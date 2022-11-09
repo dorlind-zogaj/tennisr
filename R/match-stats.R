@@ -3,32 +3,36 @@ magrittr::`%>%`
 magrittr::`%$%`
 
 get_match_stats <- function(year, event_id, match_id) {
-  
+
   Sys.sleep(4)
-  
+
   json <- glue::glue(
     "atptour.com/-/ajax/MatchStats/True/{year}/{event_id}/{match_id}/"
-  ) %>% 
+  ) %>%
     read_json()
-  
+
   data <- json$Match %>%
-    unlist() %>% 
+    unlist() %>%
     tibble::enframe() %>%
     tidyr::pivot_wider(names_from = name, values_from = value) %>%
     janitor::clean_names()
-    
+
   player_team1_sets_set_score3 <- NA
   player_team1_sets_set_score4 <- NA
+  player_team1_sets_set_score5 <- NA
+  player_team1_sets_set_score6 <- NA
   player_team2_sets_set_score3 <- NA
   player_team2_sets_set_score4 <- NA
-    
+  player_team2_sets_set_score5 <- NA
+  player_team2_sets_set_score6 <- NA
+
   details <- data %>%
     dplyr::transmute(
       year, event_id, match_id,
       match_id = paste(year, event_id, match_id, sep = "/"),
       match_date = stringr::str_sub(json$Tournament$StartDate, 1, 10) %>% as.character(),
-      match_surface = json$Tournament$Court,
-      match_round = round_short_name,
+      match_surface = json$Tournament$Court, match_court = court_name,
+      match_round = round_long_name,
       tournament_name = json$Tournament$TournamentName,
       tournament_city = json$Tournament$TournamentCity,
       tournament_draw = json$Tournament$Singles,
@@ -45,28 +49,30 @@ get_match_stats <- function(year, event_id, match_id) {
       match_score = paste0(
         player_team1_sets_set_score2, "-", player_team2_sets_set_score2, ", ",
         player_team1_sets_set_score3, "-", player_team2_sets_set_score3, ", ",
-        player_team1_sets_set_score4, "-", player_team2_sets_set_score4
-      ) %>% 
-        stringr::str_remove_all(", NA-NA") %>% 
+        player_team1_sets_set_score4, "-", player_team2_sets_set_score4, ", ",
+        player_team1_sets_set_score5, "-", player_team2_sets_set_score5, ", ",
+        player_team1_sets_set_score6, "-", player_team2_sets_set_score6
+      ) %>%
+        stringr::str_remove_all(", NA-NA") %>%
         adjust_score(match_outcome),
       match_time
     )
-    
+
   ifelse(
     details$match_outcome == "W",
     winner <- c("winner", "loser"),
     winner <- c("loser", "winner")
   )
-    
-  details <- details %>% 
-    dplyr::rename_with(~stringr::str_replace(., "home", winner[1])) %>% 
-    dplyr::rename_with(~stringr::str_replace(., "away", winner[2])) %>% 
+
+  details <- details %>%
+    dplyr::rename_with(~stringr::str_replace(., "home", winner[1])) %>%
+    dplyr::rename_with(~stringr::str_replace(., "away", winner[2])) %>%
     dplyr::select(-match_outcome)
-    
+
   stats <- json$Match %$%
     dplyr::bind_rows(
       PlayerTeam1$Sets$Stats %>%
-        dplyr::select(ServiceStats, ReturnStats, PointStats) %>% 
+        dplyr::select(ServiceStats, ReturnStats, PointStats) %>%
         dplyr::mutate(
           set_number = json$Match$PlayerTeam1$Sets$SetNumber,
           side = winner[1]
@@ -84,7 +90,7 @@ get_match_stats <- function(year, event_id, match_id) {
       side,
       set_number = dplyr::recode(
         set_number,
-        "0" = "all", "1" = "1st", "2" = "2nd", "3" = "3rd"
+        "0" = "all", "1" = "1st", "2" = "2nd", "3" = "3rd", "4" = "4th", "5" = "5th"
       ),
       aces = service_stats_aces_number,
       double_faults = service_stats_double_faults_number,
@@ -134,11 +140,11 @@ get_match_stats <- function(year, event_id, match_id) {
     tidyr::pivot_wider(
       names_from = c(set_number, side),
       values_from = c(-side, -set_number)
-    ) %>% 
-    dplyr::rename_with(~paste0("winner_", .), dplyr::ends_with("winner")) %>% 
+    ) %>%
+    dplyr::rename_with(~paste0("winner_", .), dplyr::ends_with("winner")) %>%
     dplyr::rename_with(~paste0("loser_", .), dplyr::ends_with("loser")) %>%
     dplyr::rename_with(~stringr::str_remove(., "_[^_]+$"))
-      
+
   dplyr::bind_cols(details, stats) %>% save_match_stats()
 
 }
