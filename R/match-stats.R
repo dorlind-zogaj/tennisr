@@ -82,7 +82,7 @@ get_match_stats <- function(year, event_id, match_id) {
     janitor::clean_names() %>%
     dplyr::transmute(
       side,
-      set_number = recode(
+      set_number = dplyr::recode(
         set_number,
         "0" = "all", "1" = "1st", "2" = "2nd", "3" = "3rd"
       ),
