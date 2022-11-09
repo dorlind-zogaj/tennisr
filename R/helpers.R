@@ -10,7 +10,7 @@ read_json <- function(url) {
   )
   
   url %>%
-    httr::GET(user_agent(user_agent)) %>%
+    httr::GET(httr::user_agent(user_agent)) %>%
     httr::content("text", encoding = "UTF-8") %>%
     jsonlite::fromJSON()
   
