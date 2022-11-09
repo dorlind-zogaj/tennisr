@@ -57,7 +57,8 @@ get_tournament_stats <- function(event_id, year) {
   match_id <- page %>%
     rvest::html_elements(".day-table-score a") %>% 
     rvest::html_attr("href") %>% 
-    stringr::word(6, 8, "/")
+    stringr::word(6, 8, "/") %>%
+    toupper()
   
   df <- tibble::tibble(match_id) %>%
     find_missing_id() %>% 
