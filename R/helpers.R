@@ -37,7 +37,7 @@ find_missing_id <- function(df) {
 
 save_match_stats <- function(df) {
   
- fread("data/match-stats.csv") %>%
+ data.table::fread("data/match-stats.csv") %>%
     dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>% 
     dplyr::filter(match_id != df$match_id) %>% 
     dplyr::bind_rows(
