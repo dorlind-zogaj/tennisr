@@ -1,12 +1,24 @@
-Package: atpr
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Package: tennisr
+Type: Package
+Title: WIP
+Version: 1.0.0
+Author: Dorlind Zogaj
+Maintainer: Dorlind Zogaj <dorlind.zogaj@gmail.com>
+Description: Functions to scrape set-level data from atptour.com,
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+LazyData: true
+RoxygenNote: 7.2.1
+Depends: 
+    data.table (>= 1.14.2),
+    dplyr (>= 1.0.8),
+    httr (>= 1.4.4),
+    janitor (>= 2.1.0),
+    jsonlite (>= 1.8.0),
+    magrittr (>= 2.0.3),
+    purrr (>= 0.3.4),
+    rvest (>= 1.0.2),
+    stringi (>= 1.7.6),
+    stringr (>= 1.4.0),
+    tibble (>= 3.1.8),
+    tidyr (>= 1.2.0),
+    usethis (>= 2.1.5)
